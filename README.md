@@ -1,1 +1,1 @@
-# CSC-476-Game
+# CSC-476-VFC-Workshop
