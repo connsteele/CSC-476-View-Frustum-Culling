@@ -27,6 +27,7 @@
 using namespace std;
 using namespace glm;
 
+// to cull make sure that the negagtive distance is larger than the other negative distance it can be culled bc its outside
 class Application : public EventCallbacks
 {
 
@@ -121,50 +122,50 @@ class Application : public EventCallbacks
 	}
 
 mat4 SetProjectionMatrix(shared_ptr<Program> curShade) {
- int width, height;
- glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
- float aspect = width/(float)height;
- mat4 Projection = perspective(radians(50.0f), aspect, 0.1f, 100.0f);
- glUniformMatrix4fv(curShade->getUniform("P"), 1, GL_FALSE, value_ptr(Projection));
- return Projection;
+	int width, height;
+	glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+	float aspect = width/(float)height;
+	mat4 Projection = perspective(radians(50.0f), aspect, 0.1f, 100.0f);
+	glUniformMatrix4fv(curShade->getUniform("P"), 1, GL_FALSE, value_ptr(Projection));
+	return Projection;
 }
 
 
 mat4 SetOrthoMatrix(shared_ptr<Program> curShade) {
 	float wS = 2.5;
- mat4 ortho = glm::ortho(-15.0f*wS, 15.0f*wS, -15.0f*wS, 15.0f*wS, 2.1f, 100.f);
- glUniformMatrix4fv(curShade->getUniform("P"), 1, GL_FALSE, value_ptr(ortho));
- return ortho;
+	mat4 ortho = glm::ortho(-15.0f*wS, 15.0f*wS, -15.0f*wS, 15.0f*wS, 2.1f, 100.f);
+	glUniformMatrix4fv(curShade->getUniform("P"), 1, GL_FALSE, value_ptr(ortho));
+	return ortho;
 }
 
 
 /* camera controls - this is the camera for the top down view */
 mat4 SetTopView(shared_ptr<Program> curShade) {
- mat4 Cam = lookAt(g_eye + vec3(0, 8, 0), g_eye, g_lookAt-g_eye);
- glUniformMatrix4fv(curShade->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
- return Cam;
+	mat4 Cam = lookAt(g_eye + vec3(0, 8, 0), g_eye, g_lookAt-g_eye);
+	glUniformMatrix4fv(curShade->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
+	return Cam;
 }
 
 /*normal game camera */
 mat4 SetView(shared_ptr<Program> curShade) {
- mat4 Cam = lookAt(g_eye, g_lookAt, vec3(0, 1, 0));
- glUniformMatrix4fv(curShade->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
- return Cam;
+	mat4 Cam = lookAt(g_eye, g_lookAt, vec3(0, 1, 0));
+	glUniformMatrix4fv(curShade->getUniform("V"), 1, GL_FALSE, value_ptr(Cam));
+	return Cam;
 }
 
 /* model transforms - these are insane because they came from p2B and P4*/
 mat4 SetModel(shared_ptr<Program> curS, vec3 trans, float rotY, float rotX, vec3 sc) {
- mat4 Trans = translate( glm::mat4(1.0f), trans);
- mat4 RotateY = rotate( glm::mat4(1.0f), rotY, glm::vec3(0.0f, 1, 0));
- mat4 RotateX = rotate( glm::mat4(1.0f), rotX, glm::vec3(1,0 ,0));
- mat4 Sc = scale( glm::mat4(1.0f), sc);
- mat4 ctm = Trans*RotateY*Sc*RotateX;
- glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
- return ctm;
+	mat4 Trans = translate( glm::mat4(1.0f), trans);
+	mat4 RotateY = rotate( glm::mat4(1.0f), rotY, glm::vec3(0.0f, 1, 0));
+	mat4 RotateX = rotate( glm::mat4(1.0f), rotX, glm::vec3(1,0 ,0));
+	mat4 Sc = scale( glm::mat4(1.0f), sc);
+	mat4 ctm = Trans*RotateY*Sc*RotateX;
+	glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(ctm));
+	return ctm;
 }
 
 void SetModel(shared_ptr<Program> curS, mat4 m) {
- glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(m));
+	glUniformMatrix4fv(curS->getUniform("M"), 1, GL_FALSE, value_ptr(m));
 }
 
 /* draw a snowman old code re-purposed so ugly*/
@@ -356,65 +357,115 @@ void initGeom(const std::string& resourceDirectory) {
 
 
 /* VFC code starts here TODO - start here and fill in these functions!!!*/
-vec4 Left, Right, Bottom, Top, Near, Far;
+vec4 Left, Right, Bottom, Top, Near, Far; // Planes of the VFC
 vec4 planes[6];
 
 /*TODO fill in */
 void ExtractVFPlanes(mat4 P, mat4 V) {
 
-  /* composite matrix */
-  mat4 comp = P*V;
-  vec3 n; //use to pull out normal
-  float l; //length of normal for plane normalization
+	/* composite matrix */
+	mat4 comp = P*V;
+	vec3 n; //use to pull out normal
+	float l; //length of normal for plane normalization
 
-  Left.x = 0; // see handout to fill in with values from comp
-  Left.y = 0; // see handout to fill in with values from comp
-  Left.z = 0; // see handout to fill in with values from comp
-  Left.w = 0; // see handout to fill in with values from comp
-  planes[0] = Left;
-  cout << "Left' " << Left.x << " " << Left.y << " " <<Left.z << " " << Left.w << endl;
+	// The rows and columns for indices will be filped here vs what is on the handout, if you transpose the matrix it will be the same indices
+	Left.x = comp[0][3] + comp[0][0]; // see handout to fill in with values from comp (index into comp and use the coefficents for plane eq)
+	Left.y = comp[1][3] + comp[1][0]; // see handout to fill in with values from comp
+	Left.z = comp[2][3] + comp[2][0]; // see handout to fill in with values from comp
+	Left.w = comp[3][3] + comp[3][0]; // see handout to fill in with values from comp
+	n = vec3(Left.x, Left.y, Left.z);
+	l = length(n);
+	Left.x /= l;
+	Left.y /= l;
+	Left.z /= l;
+	Left.w /= l;
+
+	planes[0] = Left;
+	cout << "Left' " << Left.x << " " << Left.y << " " <<Left.z << " " << Left.w << endl;
   
-  Right.x = 0; // see handout to fill in with values from comp
-  Right.y = 0; // see handout to fill in with values from comp
-  Right.z = 0; // see handout to fill in with values from comp
-  Right.w = 0; // see handout to fill in with values from comp
-  planes[1] = Right;
-  cout << "Right " << Right.x << " " << Right.y << " " <<Right.z << " " << Right.w << endl;
+	Right.x = comp[0][3] - comp[0][0]; // see handout to fill in with values from comp
+	Right.y = comp[1][3] - comp[1][0]; // see handout to fill in with values from comp
+	Right.z = comp[2][3] - comp[2][0]; // see handout to fill in with values from comp
+	Right.w = comp[3][3] - comp[3][0]; // see handout to fill in with values from comp
 
-  Bottom.x = 0; // see handout to fill in with values from comp
-  Bottom.y = 0; // see handout to fill in with values from comp
-  Bottom.z = 0; // see handout to fill in with values from comp
-  Bottom.w = 0; // see handout to fill in with values from comp
-  planes[2] = Bottom;
-  cout << "Bottom " << Bottom.x << " " << Bottom.y << " " <<Bottom.z << " " << Bottom.w << endl;
+	//normalize
+	n = vec3(Right.x, Right.y, Right.z);
+	l = length(n);
+	Right.x /= l;
+	Right.y /= l;
+	Right.z /= l;
+	Right.w /= l;
+
+	planes[1] = Right;
+	cout << "Right " << Right.x << " " << Right.y << " " <<Right.z << " " << Right.w << endl;
+
+	Bottom.x = comp[0][3] + comp[0][1]; // see handout to fill in with values from comp
+	Bottom.y = comp[1][3] + comp[1][1]; // see handout to fill in with values from comp
+	Bottom.z = comp[2][3] + comp[2][1]; // see handout to fill in with values from comp
+	Bottom.w = comp[3][3] + comp[3][1]; // see handout to fill in with values from comp
+	//normalize
+	n = vec3(Bottom.x, Bottom.y, Bottom.z);
+	l = length(n);
+	Bottom.x /= l;
+	Bottom.y /= l;
+	Bottom.z /= l;
+	Bottom.w /= l;
+	planes[2] = Bottom;
+	cout << "Bottom " << Bottom.x << " " << Bottom.y << " " <<Bottom.z << " " << Bottom.w << endl;
   
-  Top.x = 0; // see handout to fill in with values from comp
-  Top.y = 0; // see handout to fill in with values from comp
-  Top.z = 0; // see handout to fill in with values from comp
-  Top.w = 0; // see handout to fill in with values from comp
-  planes[3] = Top;
-  cout << "Top " << Top.x << " " << Top.y << " " <<Top.z << " " << Top.w << endl;
+	Top.x = comp[0][3] - comp[0][1]; // see handout to fill in with values from comp
+	Top.y = comp[1][3] - comp[1][1]; // see handout to fill in with values from comp
+	Top.z = comp[2][3] - comp[2][1]; // see handout to fill in with values from comp
+	Top.w = comp[3][3] - comp[3][1]; // see handout to fill in with values from comp
+	//normalize
+	n = vec3(Top.x, Top.y, Top.z);
+	l = length(n);
+	Top.x /= l;
+	Top.y /= l;
+	Top.z /= l;
+	Top.w /= l;
 
-  Near.x = 0; // see handout to fill in with values from comp
-  Near.y = 0; // see handout to fill in with values from comp
-  Near.z = 0; // see handout to fill in with values from comp
-  Near.w = 0; // see handout to fill in with values from comp
-  planes[4] = Near;
-  cout << "Near " << Near.x << " " << Near.y << " " <<Near.z << " " << Near.w << endl;
+	planes[3] = Top;
+	cout << "Top " << Top.x << " " << Top.y << " " <<Top.z << " " << Top.w << endl;
 
-  Far.x = 0; // see handout to fill in with values from comp
-  Far.y = 0; // see handout to fill in with values from comp
-  Far.z = 0; // see handout to fill in with values from comp
-  Far.w = 0; // see handout to fill in with values from comp
-  planes[5] = Far;
-  cout << "Far " << Far.x << " " << Far.y << " " <<Far.z << " " << Far.w << endl;
+	Near.x = comp[0][3] + comp[0][2]; // see handout to fill in with values from comp
+	Near.y = comp[1][3] + comp[1][2]; // see handout to fill in with values from comp
+	Near.z = comp[2][3] + comp[2][2]; // see handout to fill in with values from comp
+	Near.w = comp[3][3] + comp[3][2]; // see handout to fill in with values from comp
+	//normalize
+	n = vec3(Near.x, Near.y, Near.z);
+	l = length(n);
+	Near.x /= l;
+	Near.y /= l;
+	Near.z /= l;
+	Near.w /= l;
+	planes[4] = Near;
+	cout << "Near " << Near.x << " " << Near.y << " " <<Near.z << " " << Near.w << endl;
+
+	Far.x = comp[0][3] - comp[0][2]; // see handout to fill in with values from comp
+	Far.y = comp[1][3] - comp[1][2]; // see handout to fill in with values from comp
+	Far.z = comp[2][3] - comp[2][2]; // see handout to fill in with values from comp
+	Far.w = comp[3][3] - comp[3][2]; // see handout to fill in with values from comp
+	//normalize
+	n = vec3(Far.x, Far.y, Far.z); // Get the values to compute the normal
+	l = length(n); // Get the magnitude and use as divisor to get normalized value
+	Far.x /= l;
+	Far.y /= l;
+	Far.z /= l;
+	Far.w /= l;
+	planes[5] = Far;
+	cout << "Far " << Far.x << " " << Far.y << " " <<Far.z << " " << Far.w << endl;
+
+
 }
 
 
 /* helper function to compute distance to the plane */
 /* TODO: fill in */
 float DistToPlane(float A, float B, float C, float D, vec3 point) {
-  return 0;
+	float outVal = A * point.x + B * point.y + C * point.z + D;
+
+	return outVal;
 }
 
 /* Actual cull on planes */
@@ -429,6 +480,14 @@ int ViewFrustCull(vec3 center, float radius) {
     for (int i=0; i < 6; i++) {
       dist = DistToPlane(planes[i].x, planes[i].y, planes[i].z, planes[i].w, center);
       //test against each plane
+	  if (dist < 0)
+	  {
+		  return 1;
+	  }
+	  else if (dist > 0)
+	  {
+		  return 0;
+	  }
 
 
     }
@@ -494,36 +553,36 @@ assert(glGetError() == GL_NO_ERROR);
 
 void render() {
 	
-  // Get current frame buffer size.
- int width, height;
- glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
- glViewport(0, 0, width, height);
+	// Get current frame buffer size.
+	int width, height;
+	glfwGetFramebufferSize(windowManager->getHandle(), &width, &height);
+	glViewport(0, 0, width, height);
 
 	// Clear the screen
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
- prog->bind();
- glUniform3f(prog->getUniform("LPos"), g_light.x, g_light.y, g_light.z);
- mat4 P = SetProjectionMatrix(prog);
- mat4 V = SetView(prog);
- ExtractVFPlanes(P, V);
- drawScene(prog, CULL);
+	prog->bind();
+	glUniform3f(prog->getUniform("LPos"), g_light.x, g_light.y, g_light.z);
+	mat4 P = SetProjectionMatrix(prog);
+	mat4 V = SetView(prog);
+	ExtractVFPlanes(P, V);
+	drawScene(prog, CULL);
 
-  /* draw the complete scene from a top down camera */
- glClear( GL_DEPTH_BUFFER_BIT);
- glViewport(0, 0, 300, 300);
- SetOrthoMatrix(prog);
- SetTopView(prog);
- drawScene(prog, false);
+	/* draw the complete scene from a top down camera */
+	glClear( GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, 300, 300);
+	SetOrthoMatrix(prog);
+	SetTopView(prog);
+	drawScene(prog, false);
 
 	/* draw the culled scene from a top down camera */
- glClear( GL_DEPTH_BUFFER_BIT);
- glViewport(0, height-300, 300, 300);
- SetOrthoMatrix(prog);
- SetTopView(prog);
- drawScene(prog, CULL);
+	glClear( GL_DEPTH_BUFFER_BIT);
+	glViewport(0, height-300, 300, 300);
+	SetOrthoMatrix(prog);
+	SetTopView(prog);
+	drawScene(prog, CULL);
 
- prog->unbind();
+	prog->unbind();
 
 }
 
@@ -586,7 +645,7 @@ void scrollCallback(GLFWwindow* window, double deltaX, double deltaY) {
  	if (key == GLFW_KEY_Z && action == GLFW_RELEASE) {
   		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
  	}
-	if (key = GLFW_KEY_P && action == GLFW_PRESS) {
+	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
 		CULL = !CULL;
 	}
 }
