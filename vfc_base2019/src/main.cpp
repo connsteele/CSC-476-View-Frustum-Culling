@@ -381,7 +381,7 @@ void ExtractVFPlanes(mat4 P, mat4 V) {
 	Left.w /= l;
 
 	planes[0] = Left;
-	cout << "Left' " << Left.x << " " << Left.y << " " <<Left.z << " " << Left.w << endl;
+	// cout << "Left' " << Left.x << " " << Left.y << " " <<Left.z << " " << Left.w << endl;
   
 	Right.x = comp[0][3] - comp[0][0]; // see handout to fill in with values from comp
 	Right.y = comp[1][3] - comp[1][0]; // see handout to fill in with values from comp
@@ -397,7 +397,7 @@ void ExtractVFPlanes(mat4 P, mat4 V) {
 	Right.w /= l;
 
 	planes[1] = Right;
-	cout << "Right " << Right.x << " " << Right.y << " " <<Right.z << " " << Right.w << endl;
+	// cout << "Right " << Right.x << " " << Right.y << " " <<Right.z << " " << Right.w << endl;
 
 	Bottom.x = comp[0][3] + comp[0][1]; // see handout to fill in with values from comp
 	Bottom.y = comp[1][3] + comp[1][1]; // see handout to fill in with values from comp
@@ -411,7 +411,7 @@ void ExtractVFPlanes(mat4 P, mat4 V) {
 	Bottom.z /= l;
 	Bottom.w /= l;
 	planes[2] = Bottom;
-	cout << "Bottom " << Bottom.x << " " << Bottom.y << " " <<Bottom.z << " " << Bottom.w << endl;
+	// cout << "Bottom " << Bottom.x << " " << Bottom.y << " " <<Bottom.z << " " << Bottom.w << endl;
   
 	Top.x = comp[0][3] - comp[0][1]; // see handout to fill in with values from comp
 	Top.y = comp[1][3] - comp[1][1]; // see handout to fill in with values from comp
@@ -426,7 +426,7 @@ void ExtractVFPlanes(mat4 P, mat4 V) {
 	Top.w /= l;
 
 	planes[3] = Top;
-	cout << "Top " << Top.x << " " << Top.y << " " <<Top.z << " " << Top.w << endl;
+	// cout << "Top " << Top.x << " " << Top.y << " " <<Top.z << " " << Top.w << endl;
 
 	Near.x = comp[0][3] + comp[0][2]; // see handout to fill in with values from comp
 	Near.y = comp[1][3] + comp[1][2]; // see handout to fill in with values from comp
@@ -440,7 +440,7 @@ void ExtractVFPlanes(mat4 P, mat4 V) {
 	Near.z /= l;
 	Near.w /= l;
 	planes[4] = Near;
-	cout << "Near " << Near.x << " " << Near.y << " " <<Near.z << " " << Near.w << endl;
+	// cout << "Near " << Near.x << " " << Near.y << " " <<Near.z << " " << Near.w << endl;
 
 	Far.x = comp[0][3] - comp[0][2]; // see handout to fill in with values from comp
 	Far.y = comp[1][3] - comp[1][2]; // see handout to fill in with values from comp
@@ -454,7 +454,7 @@ void ExtractVFPlanes(mat4 P, mat4 V) {
 	Far.z /= l;
 	Far.w /= l;
 	planes[5] = Far;
-	cout << "Far " << Far.x << " " << Far.y << " " <<Far.z << " " << Far.w << endl;
+	// cout << "Far " << Far.x << " " << Far.y << " " <<Far.z << " " << Far.w << endl;
 
 
 }
@@ -476,11 +476,11 @@ int ViewFrustCull(vec3 center, float radius) {
   float dist;
 
   if (CULL) {
-    cout << "testing against all planes" << endl;
+    // cout << "testing against all planes" << endl;
     for (int i=0; i < 6; i++) {
       dist = DistToPlane(planes[i].x, planes[i].y, planes[i].z, planes[i].w, center);
       //test against each plane
-	  if (dist < radius) // Compare to radius of the object
+	  if (dist < radius) // Compare to radius of the object 
 	  {
 		  return 1;
 	  }
@@ -589,7 +589,7 @@ void render() {
 
 void mouseCallback(GLFWwindow *window, int button, int action, int mods) {
 
-	cout << "use two finger mouse scroll" << endl;
+	// cout << "use two finger mouse scroll" << endl;
 }
 
 /* much of the camera is here */
