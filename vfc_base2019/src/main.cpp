@@ -22,7 +22,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#define numO 200
+#define numO 400
 
 using namespace std;
 using namespace glm;
@@ -484,10 +484,10 @@ int ViewFrustCull(vec3 center, float radius) {
 	  {
 		  return 1;
 	  }
-	  else if (dist > radius)
+	  /*else if (dist > radius)
 	  {
 		  return 0;
-	  }
+	  }*/
 
 
     }
