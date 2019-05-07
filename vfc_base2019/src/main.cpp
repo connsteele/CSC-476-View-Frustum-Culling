@@ -480,11 +480,11 @@ int ViewFrustCull(vec3 center, float radius) {
     for (int i=0; i < 6; i++) {
       dist = DistToPlane(planes[i].x, planes[i].y, planes[i].z, planes[i].w, center);
       //test against each plane
-	  if (dist < 0)
+	  if (dist < radius) // Compare to radius of the object
 	  {
 		  return 1;
 	  }
-	  else if (dist > 0)
+	  else if (dist > radius)
 	  {
 		  return 0;
 	  }
